@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ContactForm,
@@ -12,36 +12,23 @@ import { nanoid } from 'nanoid';
 
 const CONTACTS_LOCAL_STORAGE_KEY = 'contacts';
 
-export default class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export default function App() {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
+  useEffect(() => {
     const storageContacts = localStorage.getItem(CONTACTS_LOCAL_STORAGE_KEY);
     if (storageContacts && storageContacts !== 0) {
-      this.setState({ contacts: JSON.parse(storageContacts) });
+      setContacts(JSON.parse(storageContacts));
     }
-  }
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-    if (contacts !== prevState.contacts) {
-      this.updateLocaleStorage(contacts);
-    }
-    if (contacts.length === 0) {
-      localStorage.removeItem(CONTACTS_LOCAL_STORAGE_KEY);
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem(CONTACTS_LOCAL_STORAGE_KEY, JSON.stringify(contacts));
+  }, [contacts]);
 
-  updateLocaleStorage = contacts => {
-    const savedContacts = JSON.stringify(contacts);
-    localStorage.setItem(CONTACTS_LOCAL_STORAGE_KEY, savedContacts);
-  };
-
-  addNewContact = ({ name, number }) => {
-    const existingContact = this.checkIfContactExist(name);
+  const addNewContact = ({ name, number }) => {
+    const existingContact = checkIfContactExist(name);
 
     if (!existingContact) {
       const newContact = {
@@ -49,7 +36,7 @@ export default class App extends Component {
         name,
         number,
       };
-      this.setState(
+      setContacts(
         prevState => ({
           contacts: [...prevState.contacts, newContact],
         }),
@@ -65,24 +52,21 @@ export default class App extends Component {
     }
   };
 
-  checkIfContactExist(name) {
-    const { contacts } = this.state;
+  const checkIfContactExist = ({ name }) => {
     return contacts.find(
       contact => contact.name.toLowerCase() === name.toLowerCase()
     );
-  }
-
-  handleFilterChange = e => {
-    this.setState({ filter: e.target.value });
   };
 
-  deleteContact = id => {
-    const deletedContact = this.state.contacts.find(
-      contact => contact.id === id
-    );
+  const handleFilterChange = e => {
+    setFilter(e.target.value);
+  };
+
+  const deleteContact = id => {
+    const deletedContact = contacts.find(contact => contact.id === id);
     if (deletedContact) {
-      this.setState(state => ({
-        contacts: state.contacts.filter(contact => contact.id !== id),
+      setContacts(contacts => ({
+        contacts: contacts.filter(contact => contact.id !== id),
       }));
       localStorage.setItem(
         CONTACTS_LOCAL_STORAGE_KEY,
@@ -92,24 +76,19 @@ export default class App extends Component {
     }
   };
 
-  render() {
-    const { contacts, filter } = this.state;
-    const filteredContacts = contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
-    );
-    return (
-      <Container>
-        <Section title={'Phonebook'}>
-          <ContactForm handler={this.addNewContact} />
-        </Section>
-        <Section title={'Contacts'}>
-          <InputFiltr value={filter} onChange={this.handleFilterChange} />
-          <Contacts
-            contacts={filteredContacts}
-            handleDelete={this.deleteContact}
-          />
-        </Section>
-      </Container>
-    );
-  }
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return (
+    <Container>
+      <Section title={'Phonebook'}>
+        <ContactForm handler={addNewContact} />
+      </Section>
+      <Section title={'Contacts'}>
+        <InputFiltr value={filter} onChange={handleFilterChange} />
+        <Contacts contacts={filteredContacts} handleDelete={deleteContact} />
+      </Section>
+    </Container>
+  );
 }
