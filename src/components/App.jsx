@@ -28,52 +28,31 @@ export default function App() {
   }, [contacts]);
 
   const addNewContact = ({ name, number }) => {
-    const existingContact = checkIfContactExist(name);
-
-    if (!existingContact) {
+    if (
+      contacts.find(contact => contact.name.toLowerCase()) !==
+      name.toLowerCase()
+    ) {
       const newContact = {
         id: nanoid(),
         name,
         number,
       };
-      setContacts(
-        prevState => ({
-          contacts: [...prevState.contacts, newContact],
-        }),
-        () => {
-          localStorage.setItem(
-            CONTACTS_LOCAL_STORAGE_KEY,
-            JSON.stringify(this.state.contacts)
-          );
-        }
-      );
+      setContacts(prev => [...prev, newContact]);
     } else {
       alert(`${name} already exists!`);
     }
   };
 
-  const checkIfContactExist = ({ name }) => {
-    return contacts.find(
-      contact => contact.name.toLowerCase() === name.toLowerCase()
-    );
-  };
+  useEffect(() => {
+    localStorage.setItem(CONTACTS_LOCAL_STORAGE_KEY, JSON.stringify(contacts));
+  }, [contacts]);
 
   const handleFilterChange = e => {
     setFilter(e.target.value);
   };
 
   const deleteContact = id => {
-    const deletedContact = contacts.find(contact => contact.id === id);
-    if (deletedContact) {
-      setContacts(contacts => ({
-        contacts: contacts.filter(contact => contact.id !== id),
-      }));
-      localStorage.setItem(
-        CONTACTS_LOCAL_STORAGE_KEY,
-        JSON.stringify(this.state.contacts)
-      );
-      alert(`${deletedContact.name} has beedn removed!`);
-    }
+    setContacts(prev => prev.filter(contact => contact.id !== id));
   };
 
   const filteredContacts = contacts.filter(contact =>
