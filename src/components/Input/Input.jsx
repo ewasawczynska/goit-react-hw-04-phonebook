@@ -1,13 +1,15 @@
-import { React, useState } from 'react';
+import React, { Component } from 'react';
 import { ErrorMessage, StyledInput } from './Input.styled';
 import PropTypes from 'prop-types';
 
-export default function Input() {
-  const [state, setState] = useState('');
+export default class Input extends Component {
+  state = {
+    value: '',
+  };
 
-  const handleChange = e => {
+  handleChange = e => {
     const inputValue = e.target.value;
-    setState(inputValue);
+    this.setState({ value: inputValue });
     if (this.props.onChange) {
       this.props.onChange({
         inputName: this.props.name,
@@ -16,31 +18,33 @@ export default function Input() {
     }
   };
 
-  const checkInputValid = () => {
+  checkInputValid() {
     const pattern = this.props.pattern;
+    const value = this.state.value;
     const regExp = new RegExp(pattern);
-    return regExp.test(state);
-  };
+    return regExp.test(value);
+  }
 
-  const { type, name, pattern, title, required, value } = this.props;
-  const valid = value === '' || checkInputValid();
-  const inputClassName = value !== '' ? (valid ? 'valid' : 'invalid') : '';
-
-  return (
-    <div>
-      <StyledInput
-        type={type}
-        name={name}
-        pattern={pattern}
-        title={title}
-        required={required}
-        onChange={handleChange}
-        className={inputClassName}
-        value={value}
-      />
-      {!valid ? <ErrorMessage>{title}</ErrorMessage> : null}
-    </div>
-  );
+  render() {
+    const { type, name, pattern, title, required, value } = this.props;
+    const valid = value === '' || this.checkInputValid();
+    const inputClassName = value !== '' ? (valid ? 'valid' : 'invalid') : '';
+    return (
+      <div>
+        <StyledInput
+          type={type}
+          name={name}
+          pattern={pattern}
+          title={title}
+          required={required}
+          onChange={this.handleChange}
+          className={inputClassName}
+          value={value}
+        />
+        {!valid ? <ErrorMessage>{title}</ErrorMessage> : null}
+      </div>
+    );
+  }
 }
 
 Input.propTypes = {
