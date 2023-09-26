@@ -2,16 +2,15 @@ import { React, useState } from 'react';
 import { ErrorMessage, StyledInput } from './Input.styled';
 import PropTypes from 'prop-types';
 
-export default function Input() {
+export default function Input({ type, name, pattern, title, required, value }) {
   const [state, setState] = useState('');
 
-  const handleChange = e => {
-    const inputValue = e.target.value;
-    setState(inputValue);
-    if (this.props.onChange) {
-      this.props.onChange({
-        inputName: this.props.name,
-        inputValue: inputValue,
+  const handleChange = (e, onChange) => {
+    setState(e.target.value);
+    if (onChange) {
+      onChange({
+        inputName: name,
+        inputValue: e.target.value,
       });
     }
   };
@@ -22,9 +21,8 @@ export default function Input() {
     return regExp.test(state);
   };
 
-  const { type, name, pattern, title, required, value } = this.props;
-  const valid = value === '' || checkInputValid();
-  const inputClassName = value !== '' ? (valid ? 'valid' : 'invalid') : '';
+  const valid = state === '' || checkInputValid;
+  const inputClassName = state !== '' ? (valid ? 'valid' : 'invalid') : '';
 
   return (
     <div>
@@ -36,7 +34,7 @@ export default function Input() {
         required={required}
         onChange={handleChange}
         className={inputClassName}
-        value={value}
+        value={state}
       />
       {!valid ? <ErrorMessage>{title}</ErrorMessage> : null}
     </div>
@@ -49,5 +47,4 @@ Input.propTypes = {
   pattern: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   required: PropTypes.bool.isRequired,
-  value: PropTypes.string.isRequired,
 };
