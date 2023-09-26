@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ContactForm,
@@ -7,6 +7,8 @@ import {
   InputFiltr,
   Section,
 } from 'components';
+
+import { nanoid } from 'nanoid';
 
 const CONTACTS_LOCAL_STORAGE_KEY = 'contacts';
 
@@ -25,27 +27,35 @@ export default function App() {
     localStorage.setItem(CONTACTS_LOCAL_STORAGE_KEY, JSON.stringify(contacts));
   }, [contacts]);
 
-  const addNewContact = newContact => {
-    const existingContact = newContact => {
-      return contacts.find(
-        contact => contact.name.toLowerCase() === newContact.name.toLowerCase()
-      );
-    };
+  const addNewContact = ({ name, number }) => {
+    const existingContact = checkIfContactExist(name);
 
     if (!existingContact) {
+      const newContact = {
+        id: nanoid(),
+        name,
+        number,
+      };
       setContacts(
-        prev => prev,
-        newContact,
+        prevState => ({
+          contacts: [...prevState.contacts, newContact],
+        }),
         () => {
           localStorage.setItem(
             CONTACTS_LOCAL_STORAGE_KEY,
-            JSON.stringify(contacts)
+            JSON.stringify(this.state.contacts)
           );
         }
       );
     } else {
-      alert(`${newContact.name} already exists!`);
+      alert(`${name} already exists!`);
     }
+  };
+
+  const checkIfContactExist = ({ name }) => {
+    return contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
   };
 
   const handleFilterChange = e => {
@@ -60,7 +70,7 @@ export default function App() {
       }));
       localStorage.setItem(
         CONTACTS_LOCAL_STORAGE_KEY,
-        JSON.stringify(contacts)
+        JSON.stringify(this.state.contacts)
       );
       alert(`${deletedContact.name} has beedn removed!`);
     }

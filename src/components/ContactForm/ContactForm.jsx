@@ -1,36 +1,26 @@
 import { StyledForm } from './ContactForm.styled';
 import { Button } from 'components/Button';
 import { Input } from 'components/Input';
+import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { nanoid } from 'nanoid';
 
-export default function ContactForm({ handler }) {
+export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
     number: '',
   });
 
-  const onChange = e => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const onChange = ({ inputName, inputValue }) => {
+    setFormData({ [inputName]: inputValue });
   };
 
   const onSubmit = e => {
     e.preventDefault();
-    const { name, number } = formData;
-    const newContact = {
-      id: nanoid(),
-      name,
-      number,
-    };
-    handler(newContact);
-    setFormData({
-      name: '',
-      number: '',
+    this.props.handler({
+      name: formData.name,
+      number: formData.number,
     });
+    setFormData({ name: '', number: '' });
   };
 
   return (
@@ -63,3 +53,7 @@ export default function ContactForm({ handler }) {
     </StyledForm>
   );
 }
+
+ContactForm.propTypes = {
+  handler: PropTypes.func.isRequired,
+};
