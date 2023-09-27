@@ -1,51 +1,51 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ErrorMessage, StyledInput } from './Input.styled';
 import PropTypes from 'prop-types';
 
-export default class Input extends Component {
-  state = {
-    value: '',
-  };
+export const Input = ({
+  type,
+  name,
+  pattern,
+  title,
+  required,
+  value,
+  onChange,
+}) => {
+  const [valueInpt, setValueInpt] = useState('');
 
-  handleChange = e => {
+  const handleChange = e => {
     const inputValue = e.target.value;
-    this.setState({ value: inputValue });
-    if (this.props.onChange) {
-      this.props.onChange({
-        inputName: this.props.name,
-        inputValue: inputValue,
-      });
-    }
+    setValueInpt(inputValue);
+    onChange({
+      inputName: name,
+      inputValue: inputValue,
+    });
   };
 
-  checkInputValid() {
-    const pattern = this.props.pattern;
-    const value = this.state.value;
+  const checkInputValid = () => {
     const regExp = new RegExp(pattern);
-    return regExp.test(value);
-  }
+    return regExp.test(valueInpt);
+  };
 
-  render() {
-    const { type, name, pattern, title, required, value } = this.props;
-    const valid = value === '' || this.checkInputValid();
-    const inputClassName = value !== '' ? (valid ? 'valid' : 'invalid') : '';
-    return (
-      <div>
-        <StyledInput
-          type={type}
-          name={name}
-          pattern={pattern}
-          title={title}
-          required={required}
-          onChange={this.handleChange}
-          className={inputClassName}
-          value={value}
-        />
-        {!valid ? <ErrorMessage>{title}</ErrorMessage> : null}
-      </div>
-    );
-  }
-}
+  const valid = value === '' || checkInputValid;
+  const inputClassName = value !== '' ? (valid ? 'valid' : 'invalid') : '';
+
+  return (
+    <div>
+      <StyledInput
+        type={type}
+        name={name}
+        pattern={pattern}
+        title={title}
+        required={required}
+        onChange={handleChange}
+        className={inputClassName}
+        value={value}
+      />
+      {!valid ? <ErrorMessage>{title}</ErrorMessage> : null}
+    </div>
+  );
+};
 
 Input.propTypes = {
   type: PropTypes.string.isRequired,
